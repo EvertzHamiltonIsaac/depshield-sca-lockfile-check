@@ -1,0 +1,31 @@
+name: DepShield SCA & Lockfile Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies (strict)
+        run: npm ci   # Valida integridad del lockfile
+
+      - name: Run SCA Scan (npm audit)
+        run: npm audit --audit-level=moderate
+
+      - name: Upload audit report (optional)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: audit-report
+          path: audit-report.json
